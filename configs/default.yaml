@@ -1,0 +1,41 @@
+# EVA_2 Default Configuration
+# 모듈화된 평가 시스템 설정 파일
+
+dataset:
+  base_path: "/data/home/pkw_aim25/EVA_2/data/UA-DETRAC"
+  image_dir: "DETRAC-Images"
+  train_annotation_dir: "DETRAC-Train-Annotations-XML"
+  test_annotation_dir: "DETRAC-Test-Annotations-XML"
+  image_extension: ".jpg"
+  frame_width: 960
+  frame_height: 540
+  fps: 25.0
+
+detection:
+  model_type: "rtdetr"  # rtdetr or yolo
+  model_path: "/data/home/pkw_aim25/EVA_2/models/detection/rtdetr-l.pt"
+  confidence_threshold: 0.3
+  # COCO vehicle classes: 2=car, 3=motorcycle, 5=bus, 7=truck
+  vehicle_classes: [2, 3, 5, 7]
+  verbose: false
+
+tracking:
+  track_thresh: 0.3      # Detection confidence threshold for tracking
+  track_buffer: 30       # Number of frames to keep lost tracks
+  match_thresh: 0.8      # IoU matching threshold
+  mot20: false           # MOT20 challenge mode
+
+evaluation:
+  iou_thresholds: [0.5, 0.75]
+  iou_threshold_range:
+    start: 0.5
+    end: 0.95
+    step: 0.05
+  use_ignored_regions: true
+  tracking_iou_threshold: 0.5  # IoU threshold for tracking evaluation
+
+output:
+  base_path: "/data/home/pkw_aim25/EVA_2/outputs"
+  save_results: true
+  save_videos: false
+  video_fps: 25

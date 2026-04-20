@@ -1,0 +1,41 @@
+# Data & Models (large files)
+data/
+models/*.pt
+outputs/
+assets/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+*.so
+
+# Virtual environment
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Claude
+.claude/
+
+# Temporary files
+*.tmp
+*.log
+*.zip

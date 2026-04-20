@@ -1,0 +1,40 @@
+# EVA_2 Tuned Configuration v1
+# track_thresh 상향으로 FP 감소 + ByteTrack 2단계 매칭 유지
+
+dataset:
+  base_path: "/data/home/pkw_aim25/EVA_2/data/UA-DETRAC"
+  image_dir: "DETRAC-Images"
+  train_annotation_dir: "DETRAC-Train-Annotations-XML"
+  test_annotation_dir: "DETRAC-Test-Annotations-XML"
+  image_extension: ".jpg"
+  frame_width: 960
+  frame_height: 540
+  fps: 25.0
+
+detection:
+  model_type: "rtdetr"
+  model_path: "/data/home/pkw_aim25/EVA_2/models/detection/rtdetr-l.pt"
+  confidence_threshold: 0.3  # 유지 (ByteTrack에 충분한 detection 전달)
+  vehicle_classes: [2, 3, 5, 7]
+  verbose: false
+
+tracking:
+  track_thresh: 0.5      # 0.3 → 0.5 (high/low conf 구분점 상향)
+  track_buffer: 20       # 30 → 20 (잘못된 트랙 빨리 제거)
+  match_thresh: 0.8      # 유지
+  mot20: false
+
+evaluation:
+  iou_thresholds: [0.5, 0.75]
+  iou_threshold_range:
+    start: 0.5
+    end: 0.95
+    step: 0.05
+  use_ignored_regions: true
+  tracking_iou_threshold: 0.5
+
+output:
+  base_path: "/data/home/pkw_aim25/EVA_2/outputs"
+  save_results: true
+  save_videos: false
+  video_fps: 25
