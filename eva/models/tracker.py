@@ -3,14 +3,10 @@
 Provides unified interface for ByteTrack tracker.
 """
 
-import sys
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
 import numpy as np
-
-# ByteTrack path (will be added to sys.path if needed)
-BYTETRACK_PATH = '/data/home/pkw_aim25/EVA_2/models/tracking/ByteTrack'
 
 
 @dataclass
@@ -83,30 +79,18 @@ class Track:
 class ByteTracker:
     """ByteTrack tracker wrapper."""
 
-    def __init__(
-        self,
-        args: Optional[TrackerArgs] = None,
-        bytetrack_path: str = BYTETRACK_PATH
-    ):
+    def __init__(self, args: Optional[TrackerArgs] = None):
         """Initialize ByteTracker.
 
         Args:
             args: TrackerArgs configuration.
-            bytetrack_path: Path to ByteTrack installation.
         """
         self.args = args or TrackerArgs()
-        self.bytetrack_path = bytetrack_path
         self.tracker = None
-        self._ensure_bytetrack_path()
-
-    def _ensure_bytetrack_path(self) -> None:
-        """Ensure ByteTrack is in sys.path."""
-        if self.bytetrack_path not in sys.path:
-            sys.path.insert(0, self.bytetrack_path)
 
     def _load_tracker(self) -> None:
         """Load the ByteTracker."""
-        from yolox.tracker.byte_tracker import BYTETracker
+        from ..tracker.byte_tracker import BYTETracker
         self.tracker = BYTETracker(self.args)
 
     def reset(self) -> None:
