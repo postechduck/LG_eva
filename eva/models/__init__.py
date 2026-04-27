@@ -10,8 +10,11 @@ from .detector import (
 )
 from .tracker import (
     TrackerArgs,
+    DeepSORTArgs,
     Track,
     ByteTracker,
+    DeepSORTTracker,
+    create_tracker,
 )
 
 __all__ = [
@@ -24,6 +27,9 @@ __all__ = [
     'VEHICLE_CLASSES',
     # Tracker
     'TrackerArgs',
+    'DeepSORTArgs',
     'Track',
     'ByteTracker',
+    'DeepSORTTracker',
+    'create_tracker',
 ]

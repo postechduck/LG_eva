@@ -36,10 +36,22 @@ class DetectionConfig:
 @dataclass
 class TrackingConfig:
     """Tracking model configuration."""
+    # Common
+    tracker_type: str = "bytetrack"  # "bytetrack" or "deepsort"
+
+    # ByteTrack parameters
     track_thresh: float = 0.3
     track_buffer: int = 30
     match_thresh: float = 0.8
     mot20: bool = False
+
+    # DeepSORT parameters
+    reid_model_path: str = ""  # Re-ID 모델 경로
+    max_dist: float = 0.2      # 최대 cosine 거리
+    max_iou_distance: float = 0.7
+    max_age: int = 70          # 최대 lost 프레임 수
+    n_init: int = 3            # 확정까지 필요한 연속 매칭 수
+    nn_budget: int = 100       # feature 저장 개수
 
 
 @dataclass
@@ -147,10 +159,19 @@ class Config:
                 'verbose': self.detection.verbose,
             },
             'tracking': {
+                'tracker_type': self.tracking.tracker_type,
+                # ByteTrack
                 'track_thresh': self.tracking.track_thresh,
                 'track_buffer': self.tracking.track_buffer,
                 'match_thresh': self.tracking.match_thresh,
                 'mot20': self.tracking.mot20,
+                # DeepSORT
+                'reid_model_path': self.tracking.reid_model_path,
+                'max_dist': self.tracking.max_dist,
+                'max_iou_distance': self.tracking.max_iou_distance,
+                'max_age': self.tracking.max_age,
+                'n_init': self.tracking.n_init,
+                'nn_budget': self.tracking.nn_budget,
             },
             'evaluation': {
                 'iou_thresholds': self.evaluation.iou_thresholds,

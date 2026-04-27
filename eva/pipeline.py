@@ -15,7 +15,9 @@ from .data import UADETRACDataset, SequenceData
 from .models import (
     Detection, Track,
     create_detector, BaseDetector,
-    TrackerArgs, ByteTracker
+    TrackerArgs, ByteTracker,
+    DeepSORTArgs, DeepSORTTracker,
+    create_tracker
 )
 from .evaluation import (
     DetectionMetrics, TrackingMetrics,
@@ -71,19 +73,26 @@ class DetectionTrackingPipeline:
     def __init__(
         self,
         detector: BaseDetector,
+        tracker_type: str = "bytetrack",
         tracker_args: Optional[TrackerArgs] = None,
+        deepsort_args: Optional[DeepSORTArgs] = None,
         warmup: bool = True
     ):
         """Initialize pipeline.
 
         Args:
             detector: Detector instance.
-            tracker_args: Optional tracker configuration.
+            tracker_type: "bytetrack" or "deepsort".
+            tracker_args: Optional ByteTrack configuration.
+            deepsort_args: Optional DeepSORT configuration.
             warmup: Whether to warm up the detector.
         """
         self.detector = detector
+        self.tracker_type = tracker_type.lower()
         self.tracker_args = tracker_args or TrackerArgs()
+        self.deepsort_args = deepsort_args
         self.tracker = None
+        self._current_frame = None  # For DeepSORT Re-ID
 
         if warmup:
             self.detector.warmup()
@@ -106,6 +115,8 @@ class DetectionTrackingPipeline:
             verbose=config.detection.verbose
         )
 
+        tracker_type = getattr(config.tracking, 'tracker_type', 'bytetrack')
+
         tracker_args = TrackerArgs(
             track_thresh=config.tracking.track_thresh,
             track_buffer=config.tracking.track_buffer,
@@ -113,11 +124,32 @@ class DetectionTrackingPipeline:
             mot20=config.tracking.mot20
         )
 
-        return cls(detector=detector, tracker_args=tracker_args)
+        deepsort_args = None
+        if tracker_type.lower() == "deepsort":
+            deepsort_args = DeepSORTArgs(
+                reid_model_path=config.tracking.reid_model_path,
+                max_dist=config.tracking.max_dist,
+                max_iou_distance=config.tracking.max_iou_distance,
+                max_age=config.tracking.max_age,
+                n_init=config.tracking.n_init,
+                nn_budget=config.tracking.nn_budget
+            )
+
+        return cls(
+            detector=detector,
+            tracker_type=tracker_type,
+            tracker_args=tracker_args,
+            deepsort_args=deepsort_args
+        )
 
     def reset_tracker(self) -> None:
         """Reset the tracker for a new sequence."""
-        self.tracker = ByteTracker(self.tracker_args)
+        if self.tracker_type == "deepsort":
+            if self.deepsort_args is None:
+                raise ValueError("DeepSORT args required for deepsort tracker")
+            self.tracker = DeepSORTTracker(self.deepsort_args)
+        else:
+            self.tracker = ByteTracker(self.tracker_args)
 
     def process_frame(
         self,
@@ -145,7 +177,10 @@ class DetectionTrackingPipeline:
 
         # Tracking
         t_track_start = time.perf_counter()
-        tracks = self.tracker.update(detections, (h, w))
+        if self.tracker_type == "deepsort":
+            tracks = self.tracker.update(detections, (h, w), frame=frame)
+        else:
+            tracks = self.tracker.update(detections, (h, w))
         tracking_latency_ms = (time.perf_counter() - t_track_start) * 1000
 
         return FrameResult(

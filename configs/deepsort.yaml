@@ -1,0 +1,51 @@
+# EVA_2 DeepSORT Configuration
+# Re-ID 기반 tracking으로 low FPS 환경에서 더 나은 성능
+
+dataset:
+  base_path: "/data/home/pkw_aim25/EVA_2/data/UA-DETRAC"
+  image_dir: "DETRAC-Images"
+  train_annotation_dir: "DETRAC-Train-Annotations-XML"
+  test_annotation_dir: "DETRAC-Test-Annotations-XML"
+  image_extension: ".jpg"
+  frame_width: 960
+  frame_height: 540
+  fps: 25.0
+
+detection:
+  model_type: "rtdetr"
+  model_path: "/data/home/pkw_aim25/EVA_2/models/detection/rtdetr-l.pt"
+  confidence_threshold: 0.3
+  vehicle_classes: [2, 3, 5, 7]
+  verbose: false
+
+tracking:
+  tracker_type: "deepsort"  # "bytetrack" or "deepsort"
+
+  # DeepSORT parameters
+  reid_model_path: "/data/home/pkw_aim25/EVA_2/models/tracking/reid/ckpt.t7"
+  max_dist: 0.2             # Max cosine distance for Re-ID matching
+  max_iou_distance: 0.7     # Max IoU distance for cascade fallback
+  max_age: 70               # Max frames to keep lost tracks
+  n_init: 3                 # Frames to confirm a track
+  nn_budget: 100            # Max features to store per track
+
+  # ByteTrack parameters (ignored when tracker_type=deepsort)
+  track_thresh: 0.5
+  track_buffer: 20
+  match_thresh: 0.8
+  mot20: false
+
+evaluation:
+  iou_thresholds: [0.5, 0.75]
+  iou_threshold_range:
+    start: 0.5
+    end: 0.95
+    step: 0.05
+  use_ignored_regions: true
+  tracking_iou_threshold: 0.5
+
+output:
+  base_path: "/data/home/pkw_aim25/EVA_2/outputs"
+  save_results: true
+  save_videos: false
+  video_fps: 25
